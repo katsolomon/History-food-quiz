@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>The Taste of Freedom: A Culinary Journey!</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .game-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            text-align: center;
+            max-width: 600px;
+        }
+        .question-card {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .option-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .option-button:hover {
+            background-color: #0056b3;
+        }
+        .result-container {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .hidden {
+            display: none;
+        }
+        .surprise {
+            margin-top: 20px;
+            font-size: 1.5em;
+        }
+        .image-container {
+            max-width: 100%;
+            margin-bottom: 10px;
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        #created-by {
+            font-size: 0.8em;
+            color: #777;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>The Taste of Freedom: A Culinary Journey!</h1>
+    <div id="name-input-container">
+        <label for="player-name">Enter Your Name:</label>
+        <input type="text" id="player-name">
+        <button onclick="startGame()">Start Game</button>
+    </div>
+    <div id="game-container" class="game-container hidden">
+        <div id="question-card" class="question-card">
+            <h2 id="question-text"></h2>
+            <div id="options-container" class="options-container">
+            </div>
+            <div id="image-container" class="image-container">
+                <img id="question-image" src="" alt="Question Image">
+            </div>
+        </div>
+        <button id="next-button" class="hidden" onclick="nextQuestion()">Next Question</button>
+        <div id="result-container" class="result-container hidden">
+            <h2>Game Over!</h2>
+            <p><span id="player-name-display"></span>, your final score is <span id="score"></span> out of <span id="total-questions"></span>.</p>
+        </div>
+        <div id="surprise-container" class="surprise hidden"></div>
+    </div>
+    <p id="created-by">Created by Kiara Solomon</p>
+
+    <script>
+        let playerName = "";
+        let currentQuestionIndex = 0;
+        let score = 0;
+        const questions = [
+            {
+                question: "What significant event related to freedom occurred in the British Caribbean on August 1, 1834?",
+                options: [
+                    "Independence from Britain",
+                    "Abolition of slavery",
+                    "Universal suffrage granted",
+                    "First sugar plantation established"
+                ],
+                answer: 1,
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Slavery_Abolition_Act_1833.jpg/440px-Slavery_Abolition_Act_1833.jpg"
+            },
+            {
+                question: "What is a traditional Caribbean dish that symbolizes freedom and resilience?",
+                options: [
+                    "Ackee and saltfish",
+                    "Pepperpot",
+                    "Ducana",
+                    "All of the above"
+                ],
+                answer: 3,
+                image: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Ackee_and_Saltfish_%283532602585%29.jpg"
+            },
+            {
+                question: "Which festival is celebrated to commemorate Emancipation in many Caribbean countries?",
+                options: [
+                    "Carnival",
+                    "Emancipation Day",
+                    "Crop Over",
+                    "Boxing Day"
+                ],
+                answer: 1,
+                image: "https://upload.wikimedia.org/wikipedia/commons/0/09/Emancipation_Day_Trinidad.jpg"
+            }
+        ];
+
+        function startGame() {
+            const nameInput = document.getElementById('player-name');
+            playerName = nameInput.value.trim();
+            if (playerName === "") {
+                alert("Please enter your name to start the game!");
+                return;
+            }
+            document.getElementById('name-input-container').classList.add('hidden');
+            document.getElementById('game-container').classList.remove('hidden');
+            document.getElementById('player-name-display').textContent = playerName;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const questionObj = questions[currentQuestionIndex];
+            document.getElementById('question-text').textContent = questionObj.question;
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            questionObj.options.forEach((option, idx) => {
+                const btn = document.createElement('button');
+                btn.textContent = option;
+                btn.className = 'option-button';
+                btn.onclick = () => selectOption(idx);
+                optionsContainer.appendChild(btn);
+            });
+            document.getElementById('question-image').src = questionObj.image;
+            document.getElementById('image-container').classList.remove('hidden');
+            document.getElementById('next-button').classList.add('hidden');
+        }
+
+        function selectOption(selected) {
+            const questionObj = questions[currentQuestionIndex];
+            const allButtons = document.querySelectorAll('.option-button');
+            allButtons.forEach((btn, idx) => {
+                btn.disabled = true;
+                if (idx === questionObj.answer) {
+                    btn.style.backgroundColor = '#28a745'; // green for correct
+                }
+                if (idx === selected && idx !== questionObj.answer) {
+                    btn.style.backgroundColor = '#dc3545'; // red for wrong
+                }
+            });
+            if (selected === questionObj.answer) {
+                score++;
+            }
+            document.getElementById('next-button').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+            } else {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            document.getElementById('question-card').classList.add('hidden');
+            document.getElementById('next-button').classList.add('hidden');
+            document.getElementById('result-container').classList.remove('hidden');
+            document.getElementById('score').textContent = score;
+            document.getElementById('total-questions').textContent = questions.length;
+            showSurprise();
+        }
+
+        function showSurprise() {
+            const surprise = document.getElementById('surprise-container');
+            if(score === questions.length){
+                surprise.textContent = "🎉 Perfect Score! Freedom tastes sweet!";
+            }else if(score > 0){
+                surprise.textContent = "🥳 Good job! Keep exploring culinary traditions!";
+            }else{
+                surprise.textContent = "😅 Don't worry, try again and savor the journey!";
+            }
+            surprise.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
